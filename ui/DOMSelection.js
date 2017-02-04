@@ -1,4 +1,5 @@
 // import last from '../util/last'
+import inBrowser from '../util/inBrowser'
 import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
@@ -23,7 +24,9 @@ class DOMSelection {
 
   constructor(editor) {
     this.editor = editor
-    this.wRange = window.document.createRange()
+    if (inBrowser) {
+      this.wRange = window.document.createRange()
+    }
   }
 
   /**
@@ -35,6 +38,7 @@ class DOMSelection {
     @returns {model/Selection}
   */
   getSelection(options) {
+    if (!inBrowser) return
     let range = this.mapDOMSelection(options)
     let doc = this.editor.getDocument()
     // TODO: consolidate
@@ -86,6 +90,7 @@ class DOMSelection {
     @param {model/Selection} sel
   */
   setSelection(sel) {
+    if (!inBrowser) return
     // console.log('### DOMSelection: setting selection', sel.toString());
     let {start, end} = this.mapModelToDOMCoordinates(sel)
     if (!start) {
