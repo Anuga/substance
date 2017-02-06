@@ -194,8 +194,7 @@ test.UI("Rendering a cursor after inline node", function(t) {
     containerId: 'body',
     surfaceId: 'body'
   })
-  let [start, end] = domSelection.mapModelToDOMCoordinates(sel)
-
+  let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
   let pSpan = editor.el.find('[data-path="p.content"]')
   let third = pSpan.getChildAt(2)
   t.ok(start.container === third.getNativeElement(), 'anchorNode should be correct.')
