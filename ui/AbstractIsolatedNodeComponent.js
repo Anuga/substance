@@ -152,12 +152,12 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   onKeydown(event) {
-    event.stopPropagation()
     // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
     // We need a global event listener for keyboard events which dispatches to the current isolated node
     if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
+      event.stopPropagation()
       event.preventDefault()
       this._escape()
     }

@@ -119,7 +119,6 @@ export function setCursor(tx, node, containerId, mode) {
 export function selectNode(tx, nodeId, containerId) {
   tx.setSelection({
     type: 'node',
-    mode: 'full',
     nodeId: nodeId,
     containerId: containerId
   })

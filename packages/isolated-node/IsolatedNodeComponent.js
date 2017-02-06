@@ -1,6 +1,19 @@
 import startsWith from '../../util/startsWith'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
+/*
+  Ideas:
+    - 'Open' IsolatedNodes: Simple structured nodes could be left 'open', i.e. without a blocker
+      and always 'enabled'.
+      This works only in browsers that are able to deal with 'contenteditable' isles,
+      i.e. a structure where the isolated node is contenteditable=false, and inner elements have contenteditable=true
+      Does not work in Edge. Works in Chrome, Safari
+      Drawbacks:
+      - it is not possible to select the node e.g. to delete (is that true?)
+
+
+
+*/
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   constructor(...args) {
@@ -29,45 +42,30 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       el.addClass('sm-default-style')
     }
 
-    // shadowing handlers of the parent surface
-    // TODO: extract this into a helper so that we can reuse it anywhere where we want
-    // to prevent propagation to the parent surface
+    // react on ESCAPE
     el.on('keydown', this.onKeydown)
-      .on('keypress', this._stopPropagation)
-      .on('keyup', this._stopPropagation)
-      .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation)
 
-    if (this.state.mode === 'cursor' && this.state.position === 'before') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-before')
-      )
-    }
-    el.append(
-      this.renderContent($$, node).ref('content')
-    )
+    let content = this.renderContent($$, node).ref('content')
+
+    el.append(content)
 
     if (disabled) {
       el.addClass('sm-disabled')
         .attr('contenteditable', false)
-        // ATTENTION: draggable=true causes trouble in Safari not to work at all
-        // i.e. does not select anymore
-        .attr('draggable', true)
-        .on('mousedown', this._reserveMousedown, this)
-        .on('click', this.onClick)
+      el.append(
+        $$('div').addClass('se-blocker')
+          .attr('draggable', true)
+          .attr('contenteditable', false)
+          .on('mousedown', this._reserveMousedown, this)
+          .on('click', this.onClick)
+
+      )
     } else {
-      // ATTENTION: see above
-      if (this.state.mode !== 'focused') {
-        // el.attr('draggable', true)
+      if (this.state.mode === 'selected') {
+        el.attr('contenteditable', false)
       }
       el.on('mousedown', this._reserveMousedown, this)
         .on('click', this.onClick)
-    }
-
-    if (this.state.mode === 'cursor' && this.state.position === 'after') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-after')
-      )
     }
 
     return el
@@ -135,7 +133,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
-      mode: 'full',
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })
@@ -143,10 +140,13 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   onClick(event) {
     if (this._mousedown) {
+      // console.log('%s: onClick()', this.id, event)
       this._mousedown = false
-      event.preventDefault()
-      event.stopPropagation()
-      this._selectNode()
+      if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
+        event.preventDefault()
+        event.stopPropagation()
+        this._selectNode()
+      }
     }
   }
 

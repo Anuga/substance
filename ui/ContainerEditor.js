@@ -189,7 +189,7 @@ class ContainerEditor extends Surface {
     let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
     let sel = this.getEditorSession().getSelection()
 
-    if (this._selectNextIsolatedNode(direction)) {
+    if (event.altKey && this._selectNextIsolatedNode(direction)) {
       event.preventDefault()
       return
     }
